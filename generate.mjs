@@ -507,10 +507,24 @@ async function fetchContributionCalendar() {
     process.env.PROFILE_TOKEN;
 
 
-  const query = `
-    query($login: String!) {
+  // GitHub Actions should have PROFILE_TOKEN.
+  // Without it, we cannot fetch the authenticated
+  // contribution calendar.
+  if (!token) {
 
-      user(login: $login) {
+    console.warn(
+      "No PROFILE_TOKEN found — using synthetic contribution data."
+    );
+
+    return synthesizeCalendar();
+  }
+
+
+  const query = `
+    query {
+      viewer {
+
+        login
 
         contributionsCollection {
 
@@ -521,7 +535,6 @@ async function fetchContributionCalendar() {
             weeks {
 
               contributionDays {
-
                 date
                 contributionCount
                 weekday
@@ -534,82 +547,104 @@ async function fetchContributionCalendar() {
   `;
 
 
-  if (token) {
+  try {
 
-    try {
+    const res =
+      await fetch(
+        "https://api.github.com/graphql",
+        {
+          method: "POST",
 
-      const res =
-        await fetch(
-          "https://api.github.com/graphql",
-          {
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
 
-            method: "POST",
+            "Content-Type":
+              "application/json",
 
-            headers: {
+            "User-Agent":
+              USERNAME
+          },
 
-              Authorization:
-                `Bearer ${token}`,
-
-              "Content-Type":
-                "application/json",
-
-              "User-Agent":
-                USERNAME
-            },
-
-
-            body:
-              JSON.stringify({
-
-                query,
-
-                variables: {
-                  login: USERNAME
-                }
-              })
-          }
-        );
-
-
-      const json =
-        await res.json();
-
-
-      const calendar =
-        json
-          ?.data
-          ?.user
-          ?.contributionsCollection
-          ?.contributionCalendar;
-
-
-      if (calendar) {
-
-        return calendar;
-      }
-
-
-      console.warn(
-        "GitHub contribution query failed."
+          body:
+            JSON.stringify({
+              query
+            })
+        }
       );
+
+
+    if (!res.ok) {
+
+      throw new Error(
+        `GitHub GraphQL HTTP ${res.status}`
+      );
+    }
+
+
+    const json =
+      await res.json();
+
+
+    if (json?.errors) {
+
+      console.error(
+        "GitHub contribution GraphQL errors:",
+        JSON.stringify(
+          json.errors,
+          null,
+          2
+        )
+      );
+
+      throw new Error(
+        "GitHub GraphQL returned errors"
+      );
+    }
+
+
+    const viewer =
+      json?.data?.viewer;
+
+
+    const calendar =
+      viewer
+        ?.contributionsCollection
+        ?.contributionCalendar;
+
+
+    if (!calendar) {
+
+      throw new Error(
+        "No contribution calendar returned by GitHub"
+      );
+    }
+
+
+    console.log(
+      `REAL GitHub contribution data: ${calendar.totalContributions} contributions for ${viewer.login}`
+    );
+
+
+    return calendar;
 
 
   } catch (error) {
 
-      console.warn(
-        "Contribution fetch failed:",
-        error.message
-      );
-    }
+    console.error(
+      "REAL GitHub contribution fetch failed:",
+      error.message
+    );
+
+
+    console.warn(
+      "Using SYNTHETIC fallback contribution data."
+    );
+
+
+    return synthesizeCalendar();
   }
-
-
-  // When running locally without a GitHub token,
-  // generate placeholder contribution data.
-
-  return synthesizeCalendar();
 }
-
 
 // ============================================================
 // LOCAL PLACEHOLDER CONTRIBUTIONS
