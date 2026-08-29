@@ -1,114 +1,228 @@
 import fs from "fs";
 
-const name = "Borjan Ladinski";
-const role = "AI Engineer";
-const stack = [
-  "Python",
-  "FastAPI",
-  "PyTorch",
-  "Hugging Face",
-  "Docker"
+const lines = [
+  { text: "$ whoami", cls: "green" },
+  { text: "Borjan Ladinski", cls: "normal" },
+  { text: "AI Engineer", cls: "blue" },
+  { text: "$ cat stack.txt", cls: "green" },
+  { text: "Python • FastAPI • PyTorch • Hugging Face • Docker", cls: "normal" },
+  { text: "$ cat currently-building.txt", cls: "green" },
+  { text: "AI systems • intelligent APIs • AI-powered applications", cls: "normal" }
 ];
+
+function typingText(text, x, y, delay, cls, speed = 0.06) {
+  const duration = Math.max(text.length * speed, 0.5);
+
+  return `
+    <text
+      x="${x}"
+      y="${y}"
+      class="${cls} typing"
+      textLength="${Math.max(text.length * 13, 1)}"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:${delay}s;
+        --duration:${duration}s;
+        --chars:${text.length};
+      "
+    >
+      ${escapeXml(text)}
+    </text>
+  `;
+}
+
+function escapeXml(str) {
+  return str
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+let y = 125;
+let delay = 0.5;
+let content = "";
+
+for (const line of lines) {
+  content += typingText(line.text, 55, y, delay, line.cls);
+
+  delay += Math.max(line.text.length * 0.06, 0.5) + 0.35;
+  y += 48;
+
+  if (
+    line.text === "AI Engineer" ||
+    line.text.includes("Docker")
+  ) {
+    y += 18;
+  }
+}
+
+const cursorDelay = delay;
 
 const svg = `
 <svg
   xmlns="http://www.w3.org/2000/svg"
   width="1000"
-  height="500"
-  viewBox="0 0 1000 500"
+  height="620"
+  viewBox="0 0 1000 620"
 >
-  <style>
-    .bg {
-      fill: #0d1117;
+
+<style>
+
+  .bg {
+    fill: #0d1117;
+  }
+
+  .terminal {
+    fill: #161b22;
+    stroke: #30363d;
+    stroke-width: 2;
+  }
+
+  text {
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace;
+
+    font-size: 21px;
+  }
+
+  .normal {
+    fill: #c9d1d9;
+  }
+
+  .green {
+    fill: #3fb950;
+  }
+
+  .blue {
+    fill: #58a6ff;
+  }
+
+  .muted {
+    fill: #8b949e;
+  }
+
+  .typing {
+    opacity: 0;
+
+    animation:
+      show 0.01s forwards,
+      type var(--duration) steps(var(--chars), end) forwards;
+
+    animation-delay:
+      var(--delay),
+      var(--delay);
+  }
+
+  @keyframes show {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes type {
+    from {
+      clip-path: inset(0 100% 0 0);
     }
 
-    .terminal {
-      fill: #161b22;
-      stroke: #30363d;
-      stroke-width: 2;
+    to {
+      clip-path: inset(0 0 0 0);
     }
+  }
 
-    .text {
-      font-family: "Courier New", monospace;
-      font-size: 22px;
-      fill: #c9d1d9;
+  .cursor {
+    opacity: 0;
+    fill: #3fb950;
+
+    animation:
+      cursor-show 0.01s forwards,
+      blink 0.8s step-end infinite;
+
+    animation-delay:
+      ${cursorDelay}s,
+      ${cursorDelay}s;
+  }
+
+  @keyframes cursor-show {
+    to {
+      opacity: 1;
     }
+  }
 
-    .green {
-      fill: #3fb950;
+  @keyframes blink {
+    50% {
+      opacity: 0;
     }
+  }
 
-    .blue {
-      fill: #58a6ff;
-    }
+</style>
 
-    .muted {
-      fill: #8b949e;
-    }
 
-    .cursor {
-      fill: #3fb950;
-      animation: blink 1s steps(2, start) infinite;
-    }
+<!-- Background -->
+<rect
+  class="bg"
+  width="1000"
+  height="620"
+  rx="18"
+/>
 
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-  </style>
 
-  <rect class="bg" width="1000" height="500" rx="18" />
+<!-- Terminal -->
+<rect
+  class="terminal"
+  x="20"
+  y="20"
+  width="960"
+  height="580"
+  rx="14"
+/>
 
-  <rect
-    class="terminal"
-    x="20"
-    y="20"
-    width="960"
-    height="460"
-    rx="14"
-  />
 
-  <circle cx="55" cy="50" r="7" fill="#ff5f56" />
-  <circle cx="80" cy="50" r="7" fill="#ffbd2e" />
-  <circle cx="105" cy="50" r="7" fill="#27c93f" />
+<!-- Window controls -->
+<circle cx="55" cy="50" r="7" fill="#ff5f56"/>
+<circle cx="80" cy="50" r="7" fill="#ffbd2e"/>
+<circle cx="105" cy="50" r="7" fill="#27c93f"/>
 
-  <text class="text muted" x="140" y="58">
-    ~/Ladinski/profile
-  </text>
 
-  <text class="text green" x="55" y="120">
-    $ whoami
-  </text>
+<!-- Title -->
+<text
+  x="140"
+  y="58"
+  class="muted"
+>
+  borjan@github: ~/profile
+</text>
 
-  <text class="text" x="55" y="160">
-    ${name}
-  </text>
 
-  <text class="text blue" x="55" y="195">
-    ${role}
-  </text>
+${content}
 
-  <text class="text green" x="55" y="255">
-    $ cat stack.txt
-  </text>
 
-  <text class="text" x="55" y="295">
-    ${stack.join("  •  ")}
-  </text>
+<!-- Final prompt -->
+<text
+  x="55"
+  y="565"
+  class="green"
+>
+  $
+</text>
 
-  <text class="text green" x="55" y="355">
-    $ status
-  </text>
+<rect
+  x="78"
+  y="546"
+  width="12"
+  height="23"
+  class="cursor"
+/>
 
-  <text class="text" x="55" y="395">
-    Building intelligent systems, APIs, and AI-powered tools.
-  </text>
-
-  <rect class="cursor" x="55" y="430" width="14" height="24" />
 </svg>
 `;
 
 fs.writeFileSync("profile.svg", svg);
 
-console.log("Generated profile.svg");
+console.log("✓ Generated typing terminal");

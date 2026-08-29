@@ -2,96 +2,267 @@
 <svg
   xmlns="http://www.w3.org/2000/svg"
   width="1000"
-  height="500"
-  viewBox="0 0 1000 500"
+  height="620"
+  viewBox="0 0 1000 620"
 >
-  <style>
-    .bg {
-      fill: #0d1117;
+
+<style>
+
+  .bg {
+    fill: #0d1117;
+  }
+
+  .terminal {
+    fill: #161b22;
+    stroke: #30363d;
+    stroke-width: 2;
+  }
+
+  text {
+    font-family:
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      Monaco,
+      Consolas,
+      "Liberation Mono",
+      "Courier New",
+      monospace;
+
+    font-size: 21px;
+  }
+
+  .normal {
+    fill: #c9d1d9;
+  }
+
+  .green {
+    fill: #3fb950;
+  }
+
+  .blue {
+    fill: #58a6ff;
+  }
+
+  .muted {
+    fill: #8b949e;
+  }
+
+  .typing {
+    opacity: 0;
+
+    animation:
+      show 0.01s forwards,
+      type var(--duration) steps(var(--chars), end) forwards;
+
+    animation-delay:
+      var(--delay),
+      var(--delay);
+  }
+
+  @keyframes show {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes type {
+    from {
+      clip-path: inset(0 100% 0 0);
     }
 
-    .terminal {
-      fill: #161b22;
-      stroke: #30363d;
-      stroke-width: 2;
+    to {
+      clip-path: inset(0 0 0 0);
     }
+  }
 
-    .text {
-      font-family: "Courier New", monospace;
-      font-size: 22px;
-      fill: #c9d1d9;
+  .cursor {
+    opacity: 0;
+    fill: #3fb950;
+
+    animation:
+      cursor-show 0.01s forwards,
+      blink 0.8s step-end infinite;
+
+    animation-delay:
+      13.889999999999999s,
+      13.889999999999999s;
+  }
+
+  @keyframes cursor-show {
+    to {
+      opacity: 1;
     }
+  }
 
-    .green {
-      fill: #3fb950;
+  @keyframes blink {
+    50% {
+      opacity: 0;
     }
+  }
 
-    .blue {
-      fill: #58a6ff;
-    }
+</style>
 
-    .muted {
-      fill: #8b949e;
-    }
 
-    .cursor {
-      fill: #3fb950;
-      animation: blink 1s steps(2, start) infinite;
-    }
+<!-- Background -->
+<rect
+  class="bg"
+  width="1000"
+  height="620"
+  rx="18"
+/>
 
-    @keyframes blink {
-      50% {
-        opacity: 0;
-      }
-    }
-  </style>
 
-  <rect class="bg" width="1000" height="500" rx="18" />
+<!-- Terminal -->
+<rect
+  class="terminal"
+  x="20"
+  y="20"
+  width="960"
+  height="580"
+  rx="14"
+/>
 
-  <rect
-    class="terminal"
-    x="20"
-    y="20"
-    width="960"
-    height="460"
-    rx="14"
-  />
 
-  <circle cx="55" cy="50" r="7" fill="#ff5f56" />
-  <circle cx="80" cy="50" r="7" fill="#ffbd2e" />
-  <circle cx="105" cy="50" r="7" fill="#27c93f" />
+<!-- Window controls -->
+<circle cx="55" cy="50" r="7" fill="#ff5f56"/>
+<circle cx="80" cy="50" r="7" fill="#ffbd2e"/>
+<circle cx="105" cy="50" r="7" fill="#27c93f"/>
 
-  <text class="text muted" x="140" y="58">
-    ~/Ladinski/profile
-  </text>
 
-  <text class="text green" x="55" y="120">
-    $ whoami
-  </text>
+<!-- Title -->
+<text
+  x="140"
+  y="58"
+  class="muted"
+>
+  borjan@github: ~/profile
+</text>
 
-  <text class="text" x="55" y="160">
-    Borjan Ladinski
-  </text>
 
-  <text class="text blue" x="55" y="195">
-    AI Engineer
-  </text>
 
-  <text class="text green" x="55" y="255">
-    $ cat stack.txt
-  </text>
+    <text
+      x="55"
+      y="125"
+      class="green typing"
+      textLength="104"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:0.5s;
+        --duration:0.5s;
+        --chars:8;
+      "
+    >
+      $ whoami
+    </text>
+  
+    <text
+      x="55"
+      y="173"
+      class="normal typing"
+      textLength="195"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:1.35s;
+        --duration:0.8999999999999999s;
+        --chars:15;
+      "
+    >
+      Borjan Ladinski
+    </text>
+  
+    <text
+      x="55"
+      y="221"
+      class="blue typing"
+      textLength="143"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:2.6s;
+        --duration:0.6599999999999999s;
+        --chars:11;
+      "
+    >
+      AI Engineer
+    </text>
+  
+    <text
+      x="55"
+      y="287"
+      class="green typing"
+      textLength="195"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:3.61s;
+        --duration:0.8999999999999999s;
+        --chars:15;
+      "
+    >
+      $ cat stack.txt
+    </text>
+  
+    <text
+      x="55"
+      y="335"
+      class="normal typing"
+      textLength="650"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:4.859999999999999s;
+        --duration:3s;
+        --chars:50;
+      "
+    >
+      Python • FastAPI • PyTorch • Hugging Face • Docker
+    </text>
+  
+    <text
+      x="55"
+      y="401"
+      class="green typing"
+      textLength="364"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:8.209999999999999s;
+        --duration:1.68s;
+        --chars:28;
+      "
+    >
+      $ cat currently-building.txt
+    </text>
+  
+    <text
+      x="55"
+      y="449"
+      class="normal typing"
+      textLength="715"
+      lengthAdjust="spacingAndGlyphs"
+      style="
+        --delay:10.239999999999998s;
+        --duration:3.3s;
+        --chars:55;
+      "
+    >
+      AI systems • intelligent APIs • AI-powered applications
+    </text>
+  
 
-  <text class="text" x="55" y="295">
-    Python  •  FastAPI  •  PyTorch  •  Hugging Face  •  Docker
-  </text>
 
-  <text class="text green" x="55" y="355">
-    $ status
-  </text>
+<!-- Final prompt -->
+<text
+  x="55"
+  y="565"
+  class="green"
+>
+  $
+</text>
 
-  <text class="text" x="55" y="395">
-    Building intelligent systems, APIs, and AI-powered tools.
-  </text>
+<rect
+  x="78"
+  y="546"
+  width="12"
+  height="23"
+  class="cursor"
+/>
 
-  <rect class="cursor" x="55" y="430" width="14" height="24" />
 </svg>
