@@ -1,0 +1,114 @@
+import fs from "fs";
+
+const name = "Borjan Ladinski";
+const role = "AI Engineer";
+const stack = [
+  "Python",
+  "FastAPI",
+  "PyTorch",
+  "Hugging Face",
+  "Docker"
+];
+
+const svg = `
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1000"
+  height="500"
+  viewBox="0 0 1000 500"
+>
+  <style>
+    .bg {
+      fill: #0d1117;
+    }
+
+    .terminal {
+      fill: #161b22;
+      stroke: #30363d;
+      stroke-width: 2;
+    }
+
+    .text {
+      font-family: "Courier New", monospace;
+      font-size: 22px;
+      fill: #c9d1d9;
+    }
+
+    .green {
+      fill: #3fb950;
+    }
+
+    .blue {
+      fill: #58a6ff;
+    }
+
+    .muted {
+      fill: #8b949e;
+    }
+
+    .cursor {
+      fill: #3fb950;
+      animation: blink 1s steps(2, start) infinite;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+  </style>
+
+  <rect class="bg" width="1000" height="500" rx="18" />
+
+  <rect
+    class="terminal"
+    x="20"
+    y="20"
+    width="960"
+    height="460"
+    rx="14"
+  />
+
+  <circle cx="55" cy="50" r="7" fill="#ff5f56" />
+  <circle cx="80" cy="50" r="7" fill="#ffbd2e" />
+  <circle cx="105" cy="50" r="7" fill="#27c93f" />
+
+  <text class="text muted" x="140" y="58">
+    ~/Ladinski/profile
+  </text>
+
+  <text class="text green" x="55" y="120">
+    $ whoami
+  </text>
+
+  <text class="text" x="55" y="160">
+    ${name}
+  </text>
+
+  <text class="text blue" x="55" y="195">
+    ${role}
+  </text>
+
+  <text class="text green" x="55" y="255">
+    $ cat stack.txt
+  </text>
+
+  <text class="text" x="55" y="295">
+    ${stack.join("  •  ")}
+  </text>
+
+  <text class="text green" x="55" y="355">
+    $ status
+  </text>
+
+  <text class="text" x="55" y="395">
+    Building intelligent systems, APIs, and AI-powered tools.
+  </text>
+
+  <rect class="cursor" x="55" y="430" width="14" height="24" />
+</svg>
+`;
+
+fs.writeFileSync("profile.svg", svg);
+
+console.log("Generated profile.svg");
