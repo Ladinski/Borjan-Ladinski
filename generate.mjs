@@ -349,27 +349,105 @@ function kv(
 
 async function fetchGitHubStats() {
 
-  const headers = {
-    "User-Agent": USERNAME
-  };
-
-
-  if (
-    process.env.PROFILE_TOKEN
-  ) {
-
-    headers.Authorization =
-      `Bearer ${process.env.PROFILE_TOKEN}`;
-  }
+  const token =
+    process.env.PROFILE_TOKEN;
 
 
   try {
 
+    // If running in GitHub Actions with our personal token,
+    // use GraphQL so private repositories can be counted too.
+    if (token) {
+
+      const query = `
+        query {
+          viewer {
+
+            repositories(
+              first: 1
+              ownerAffiliations: OWNER
+            ) {
+              totalCount
+            }
+
+            followers {
+              totalCount
+            }
+          }
+        }
+      `;
+
+
+      const res =
+        await fetch(
+          "https://api.github.com/graphql",
+          {
+            method: "POST",
+
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+
+              "Content-Type":
+                "application/json",
+
+              "User-Agent":
+                USERNAME
+            },
+
+            body:
+              JSON.stringify({
+                query
+              })
+          }
+        );
+
+
+      const json =
+        await res.json();
+
+
+      if (json?.errors) {
+
+        console.warn(
+          "GitHub GraphQL errors:",
+          json.errors
+        );
+      }
+
+
+      const viewer =
+        json?.data?.viewer;
+
+
+      if (viewer) {
+
+        console.log(
+          `Authenticated GitHub stats: ${viewer.repositories.totalCount} repos, ${viewer.followers.totalCount} followers`
+        );
+
+
+        return {
+
+          repos:
+            viewer.repositories.totalCount,
+
+          followers:
+            viewer.followers.totalCount
+        };
+      }
+    }
+
+
+    // Local fallback when PROFILE_TOKEN is not available.
     const res =
       await fetch(
         `https://api.github.com/users/${USERNAME}`,
         {
-          headers
+          headers: {
+            "User-Agent":
+              USERNAME
+          }
         }
       );
 
@@ -386,15 +464,18 @@ async function fetchGitHubStats() {
       await res.json();
 
 
+    console.log(
+      `Using public GitHub stats: ${data.public_repos} repos, ${data.followers} followers`
+    );
+
+
     return {
 
       repos:
-        data.public_repos ??
-        "—",
+        data.public_repos ?? "—",
 
       followers:
-        data.followers ??
-        "—"
+        data.followers ?? "—"
     };
 
 

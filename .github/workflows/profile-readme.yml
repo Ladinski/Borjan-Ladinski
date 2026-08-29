@@ -34,7 +34,7 @@ jobs:
 
       - run: npm run generate
         env:
-          GITHUB_TOKEN: ${{ secrets.PROFILE_TOKEN }}
+          PROFILE_TOKEN: ${{ secrets.PROFILE_TOKEN }}
 
       - name: Commit updated cards
         run: |
