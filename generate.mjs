@@ -1,228 +1,3257 @@
-import fs from "fs";
+// Generates animated terminal-style GitHub profile cards.
+// Run with: npm run generate
 
-const lines = [
-  { text: "$ whoami", cls: "green" },
-  { text: "Borjan Ladinski", cls: "normal" },
-  { text: "AI Engineer", cls: "blue" },
-  { text: "$ cat stack.txt", cls: "green" },
-  { text: "Python • FastAPI • PyTorch • Hugging Face • Docker", cls: "normal" },
-  { text: "$ cat currently-building.txt", cls: "green" },
-  { text: "AI systems • intelligent APIs • AI-powered applications", cls: "normal" }
+import { Jimp, intToRGBA } from "jimp";
+import { writeFile } from "node:fs/promises";
+
+const USERNAME = "Ladinski";
+
+const WIDTH = 1180;
+
+const ASCII_COLS = 54;
+const ASCII_ROWS = 42;
+
+const RAMP = " .:-=+*#%@";
+
+const PANEL_X = 40;
+const PANEL_Y = 92;
+
+const LEFT_W = 470;
+
+const RIGHT_X = PANEL_X + LEFT_W + 40;
+const RIGHT_W = WIDTH - RIGHT_X - 40;
+
+const LINE_H = 25;
+const SECTION_TITLE_GAP = 26;
+const SECTION_GAP = 34;
+
+
+// ============================================================
+// THEMES
+// ============================================================
+
+const THEMES = {
+
+  dark: {
+
+    name: "dark",
+
+    bg0: "#050816",
+    bg1: "#0B1120",
+
+    panel: "#0A0F1E",
+    panelAlt: "#0E1729",
+
+    border0: "#22C55E",
+    border1: "#10B981",
+    border2: "#34D399",
+
+    accent: "#38BDF8",
+
+    text: "#E2E8F0",
+    textDim: "#64748B",
+
+    leader: "#1E293B",
+
+    scan: "#7DD3FC",
+
+    marker: "#FDE047",
+
+    heat: [
+      "#101826",
+      "#0C4A6E",
+      "#0369A1",
+      "#22D3EE",
+      "#34D399"
+    ]
+  },
+
+
+  light: {
+
+    name: "light",
+
+    bg0: "#F0F9FF",
+    bg1: "#E0F2FE",
+
+    panel: "#FFFFFF",
+    panelAlt: "#F8FAFC",
+
+    border0: "#16A34A",
+    border1: "#059669",
+    border2: "#10B981",
+
+    accent: "#0284C7",
+
+    text: "#0F172A",
+    textDim: "#64748B",
+
+    leader: "#E2E8F0",
+
+    scan: "#0EA5E9",
+
+    marker: "#D97706",
+
+    heat: [
+      "#E7ECF3",
+      "#BAE6FD",
+      "#38BDF8",
+      "#0284C7",
+      "#059669"
+    ]
+  }
+};
+
+
+// ============================================================
+// ASCII PORTRAIT
+// ============================================================
+
+async function buildAscii(path) {
+
+  const img = await Jimp.read(path);
+
+  img.resize({
+    w: ASCII_COLS,
+    h: ASCII_ROWS
+  });
+
+
+  const lum = (x, y) => {
+
+    const { r, g, b } =
+      intToRGBA(img.getPixelColor(x, y));
+
+    return (
+      0.299 * r +
+      0.587 * g +
+      0.114 * b
+    ) / 255;
+  };
+
+
+  // Estimate the background brightness from the corners.
+
+  const corners = [
+
+    lum(1, 1),
+
+    lum(ASCII_COLS - 2, 1),
+
+    lum(1, ASCII_ROWS - 2),
+
+    lum(
+      ASCII_COLS - 2,
+      ASCII_ROWS - 2
+    )
+  ];
+
+
+  const bgLum =
+    corners.reduce(
+      (a, b) => a + b,
+      0
+    ) / corners.length;
+
+
+  const focusX =
+    ASCII_COLS / 2;
+
+  const focusY =
+    ASCII_ROWS * 0.46;
+
+
+  const maxDist =
+    Math.hypot(
+      ASCII_COLS * 0.6,
+      ASCII_ROWS * 0.62
+    );
+
+
+  const rows = [];
+
+
+  for (
+    let y = 0;
+    y < ASCII_ROWS;
+    y++
+  ) {
+
+    let row = "";
+
+
+    for (
+      let x = 0;
+      x < ASCII_COLS;
+      x++
+    ) {
+
+      const luminance =
+        lum(x, y);
+
+
+      const contrast =
+        smoothstep(
+          0.06,
+          0.5,
+          Math.abs(
+            luminance - bgLum
+          )
+        );
+
+
+      const dist =
+        Math.hypot(
+          x - focusX,
+          y - focusY
+        ) / maxDist;
+
+
+      const vignette =
+        1 -
+        smoothstep(
+          0.55,
+          1.05,
+          dist
+        );
+
+
+      const density =
+        Math.max(
+          0,
+          Math.min(
+            1,
+            contrast *
+              (
+                0.55 +
+                0.45 *
+                vignette
+              )
+          )
+        );
+
+
+      const idx =
+        Math.min(
+          RAMP.length - 1,
+          Math.floor(
+            density *
+            RAMP.length
+          )
+        );
+
+
+      row += RAMP[idx];
+    }
+
+
+    rows.push(
+      escapeXml(row)
+    );
+  }
+
+
+  return rows;
+}
+
+
+function smoothstep(
+  edge0,
+  edge1,
+  value
+) {
+
+  const t =
+    Math.max(
+      0,
+      Math.min(
+        1,
+        (
+          value -
+          edge0
+        ) /
+        (
+          edge1 -
+          edge0
+        )
+      )
+    );
+
+
+  return (
+    t *
+    t *
+    (
+      3 -
+      2 * t
+    )
+  );
+}
+
+
+function escapeXml(str) {
+
+  return String(str)
+
+    .replace(
+      /&/g,
+      "&amp;"
+    )
+
+    .replace(
+      /</g,
+      "&lt;"
+    )
+
+    .replace(
+      />/g,
+      "&gt;"
+    );
+}
+
+
+function kv(
+  label,
+  value,
+  col = 17
+) {
+
+  const dots =
+    ".".repeat(
+      Math.max(
+        2,
+        col -
+        label.length
+      )
+    );
+
+
+  return {
+
+    label:
+      escapeXml(
+        `${label}:`
+      ),
+
+    dots,
+
+    value:
+      escapeXml(
+        String(value)
+      )
+  };
+}
+
+
+// ============================================================
+// GITHUB PROFILE STATS
+// ============================================================
+
+async function fetchGitHubStats() {
+
+  const headers = {
+    "User-Agent": USERNAME
+  };
+
+
+  if (
+    process.env.GITHUB_TOKEN
+  ) {
+
+    headers.Authorization =
+      `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
+
+  try {
+
+    const res =
+      await fetch(
+        `https://api.github.com/users/${USERNAME}`,
+        {
+          headers
+        }
+      );
+
+
+    if (!res.ok) {
+
+      throw new Error(
+        `GitHub API status ${res.status}`
+      );
+    }
+
+
+    const data =
+      await res.json();
+
+
+    return {
+
+      repos:
+        data.public_repos ??
+        "—",
+
+      followers:
+        data.followers ??
+        "—"
+    };
+
+
+  } catch (error) {
+
+    console.warn(
+      "GitHub stats could not be fetched:",
+      error.message
+    );
+
+
+    return {
+
+      repos: "—",
+
+      followers: "—"
+    };
+  }
+}
+
+
+// ============================================================
+// CONTRIBUTION CALENDAR
+// ============================================================
+
+async function fetchContributionCalendar() {
+
+  const token =
+    process.env.GITHUB_TOKEN;
+
+
+  const query = `
+    query($login: String!) {
+
+      user(login: $login) {
+
+        contributionsCollection {
+
+          contributionCalendar {
+
+            totalContributions
+
+            weeks {
+
+              contributionDays {
+
+                date
+                contributionCount
+                weekday
+              }
+            }
+          }
+        }
+      }
+    }
+  `;
+
+
+  if (token) {
+
+    try {
+
+      const res =
+        await fetch(
+          "https://api.github.com/graphql",
+          {
+
+            method: "POST",
+
+            headers: {
+
+              Authorization:
+                `Bearer ${token}`,
+
+              "Content-Type":
+                "application/json",
+
+              "User-Agent":
+                USERNAME
+            },
+
+
+            body:
+              JSON.stringify({
+
+                query,
+
+                variables: {
+                  login: USERNAME
+                }
+              })
+          }
+        );
+
+
+      const json =
+        await res.json();
+
+
+      const calendar =
+        json
+          ?.data
+          ?.user
+          ?.contributionsCollection
+          ?.contributionCalendar;
+
+
+      if (calendar) {
+
+        return calendar;
+      }
+
+
+      console.warn(
+        "GitHub contribution query failed."
+      );
+
+
+  } catch (error) {
+
+      console.warn(
+        "Contribution fetch failed:",
+        error.message
+      );
+    }
+  }
+
+
+  // When running locally without a GitHub token,
+  // generate placeholder contribution data.
+
+  return synthesizeCalendar();
+}
+
+
+// ============================================================
+// LOCAL PLACEHOLDER CONTRIBUTIONS
+// ============================================================
+
+function synthesizeCalendar() {
+
+  const weeks = [];
+
+  const today =
+    new Date();
+
+
+  const start =
+    new Date(today);
+
+
+  start.setDate(
+    start.getDate() - 371
+  );
+
+
+  start.setDate(
+    start.getDate() -
+    start.getDay()
+  );
+
+
+  let cursor =
+    new Date(start);
+
+
+  let seed = 42;
+
+
+  const rand = () => {
+
+    seed =
+      (
+        seed *
+        1103515245 +
+        12345
+      ) %
+      2147483648;
+
+
+    return (
+      seed /
+      2147483648
+    );
+  };
+
+
+  let total = 0;
+
+
+  while (
+    cursor <= today
+  ) {
+
+    const days = [];
+
+
+    for (
+      let d = 0;
+      d < 7;
+      d++
+    ) {
+
+      const count =
+        cursor > today
+          ? 0
+          : Math.max(
+              0,
+              Math.floor(
+                rand() *
+                rand() *
+                12
+              )
+            );
+
+
+      total += count;
+
+
+      days.push({
+
+        date:
+          cursor
+            .toISOString()
+            .slice(0, 10),
+
+        contributionCount:
+          count,
+
+        weekday:
+          d
+      });
+
+
+      cursor =
+        new Date(
+          cursor.getTime() +
+          86400000
+        );
+    }
+
+
+    weeks.push({
+
+      contributionDays:
+        days
+    });
+  }
+
+
+  return {
+
+    totalContributions:
+      total,
+
+    weeks
+  };
+}
+
+
+// ============================================================
+// STREAK CALCULATIONS
+// ============================================================
+
+function computeStreaks(days) {
+
+  let current = 0;
+
+  let longest = 0;
+
+  let running = 0;
+
+
+  const today =
+    new Date()
+      .toISOString()
+      .slice(0, 10);
+
+
+  for (
+    const day of days
+  ) {
+
+    if (
+      day.contributionCount >
+      0
+    ) {
+
+      running += 1;
+
+      longest =
+        Math.max(
+          longest,
+          running
+        );
+
+    } else {
+
+      running = 0;
+    }
+  }
+
+
+  for (
+    let i =
+      days.length - 1;
+
+    i >= 0;
+
+    i--
+  ) {
+
+    if (
+      days[i].date >
+      today
+    ) {
+
+      continue;
+    }
+
+
+    if (
+      days[i]
+        .contributionCount >
+      0
+    ) {
+
+      current += 1;
+
+    } else {
+
+      break;
+    }
+  }
+
+
+  return {
+
+    current,
+
+    longest
+  };
+}
+
+
+function levelFor(
+  count,
+  max
+) {
+
+  if (
+    count <= 0
+  ) {
+
+    return 0;
+  }
+
+
+  const ratio =
+    count /
+    Math.max(
+      1,
+      max
+    );
+
+
+  if (
+    ratio >= 0.65
+  ) {
+
+    return 4;
+  }
+
+
+  if (
+    ratio >= 0.4
+  ) {
+
+    return 3;
+  }
+
+
+  if (
+    ratio >= 0.15
+  ) {
+
+    return 2;
+  }
+
+
+  return 1;
+}
+
+
+const MONTHS = [
+
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec"
 ];
 
-function typingText(text, x, y, delay, cls, speed = 0.06) {
-  const duration = Math.max(text.length * speed, 0.5);
+
+const JET_DUR = 17;
+
+// ============================================================
+// ANIMATED CONTRIBUTION PROBE
+// ============================================================
+
+function buildProbeBeam(
+  t,
+  gridX,
+  gridY,
+  cell,
+  step,
+  weeks,
+  max,
+  laneY,
+  dur
+) {
+
+  const gridW =
+    weeks.length * step;
+
+
+  const xStart =
+    gridX + 10;
+
+
+  const xEnd =
+    gridX +
+    gridW -
+    10;
+
+
+  const topY =
+    gridY +
+    cell / 2;
+
+
+  // Find the strongest contribution day
+  // in every week / column.
+
+  const columnTargets =
+    weeks.map(
+      (week) => {
+
+        let best = null;
+
+
+        week
+          .contributionDays
+          .forEach(
+            (day) => {
+
+              if (
+                !best ||
+                day.contributionCount >
+                  best.contributionCount
+              ) {
+
+                best = day;
+              }
+            }
+          );
+
+
+        const level =
+          best
+            ? levelFor(
+                best.contributionCount,
+                max
+              )
+            : 0;
+
+
+        const hit =
+          level >= 3;
+
+
+        return {
+
+          y:
+            hit
+              ? gridY +
+                best.weekday *
+                  step +
+                cell / 2
+              : topY,
+
+          color:
+            hit
+              ? t.heat[level]
+              : t.accent,
+
+          width:
+            level === 4
+              ? "2.6"
+              : level === 3
+                ? "2"
+                : "1.1",
+
+          dot:
+            level === 4
+              ? "3.4"
+              : level === 3
+                ? "2.6"
+                : "1.6"
+        };
+      }
+    );
+
+
+  const events = [];
+
+
+  columnTargets.forEach(
+    (target, wi) => {
+
+      const x =
+        gridX +
+        wi * step +
+        cell / 2;
+
+
+      const xFraction =
+        Math.min(
+          1,
+          Math.max(
+            0,
+            (
+              x -
+              xStart
+            ) /
+            (
+              xEnd -
+              xStart
+            )
+          )
+        );
+
+
+      // Forward sweep
+
+      events.push({
+
+        t:
+          xFraction *
+          0.5,
+
+        target
+      });
+
+
+      // Return sweep
+
+      events.push({
+
+        t:
+          0.5 +
+          (
+            1 -
+            xFraction
+          ) *
+          0.5,
+
+        target
+      });
+    }
+  );
+
+
+  events.sort(
+    (a, b) =>
+      a.t - b.t
+  );
+
+
+  const keyTimes = [];
+
+  const y2Values = [];
+
+  const colorValues = [];
+
+  const widthValues = [];
+
+  const dotValues = [];
+
+
+  let last = -1;
+
+
+  events.forEach(
+    ({
+      t: eventTime,
+      target
+    }) => {
+
+      let ct =
+        Math.min(
+          1,
+          Math.max(
+            0,
+            eventTime
+          )
+        );
+
+
+      if (
+        ct <= last
+      ) {
+
+        ct =
+          Math.min(
+            1,
+            last + 0.0006
+          );
+      }
+
+
+      keyTimes.push(
+        ct.toFixed(4)
+      );
+
+
+      y2Values.push(
+        (
+          -(
+            laneY -
+            target.y
+          )
+        ).toFixed(1)
+      );
+
+
+      colorValues.push(
+        target.color
+      );
+
+
+      widthValues.push(
+        target.width
+      );
+
+
+      dotValues.push(
+        target.dot
+      );
+
+
+      last = ct;
+    }
+  );
+
+
+  const kt =
+    keyTimes.join(";");
+
 
   return `
-    <text
-      x="${x}"
-      y="${y}"
-      class="${cls} typing"
-      textLength="${Math.max(text.length * 13, 1)}"
-      lengthAdjust="spacingAndGlyphs"
-      style="
-        --delay:${delay}s;
-        --duration:${duration}s;
-        --chars:${text.length};
-      "
+    <line
+      x1="0"
+      y1="0"
+      x2="0"
+      y2="${y2Values[0]}"
+      stroke="${colorValues[0]}"
+      stroke-width="${widthValues[0]}"
+      stroke-linecap="round"
+      opacity="0.85"
     >
-      ${escapeXml(text)}
-    </text>
+
+      <animate
+        attributeName="y2"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${y2Values.join(";")}"
+      />
+
+      <animate
+        attributeName="stroke"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${colorValues.join(";")}"
+      />
+
+      <animate
+        attributeName="stroke-width"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${widthValues.join(";")}"
+      />
+
+    </line>
+
+
+    <circle
+      cx="0"
+      cy="${y2Values[0]}"
+      r="${dotValues[0]}"
+      fill="${colorValues[0]}"
+    >
+
+      <animate
+        attributeName="cy"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${y2Values.join(";")}"
+      />
+
+      <animate
+        attributeName="fill"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${colorValues.join(";")}"
+      />
+
+      <animate
+        attributeName="r"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="${kt}"
+        values="${dotValues.join(";")}"
+      />
+
+    </circle>
   `;
 }
 
-function escapeXml(str) {
-  return str
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
 
-let y = 125;
-let delay = 0.5;
-let content = "";
+// ============================================================
+// MARKER FLASH ANIMATION
+// ============================================================
 
-for (const line of lines) {
-  content += typingText(line.text, 55, y, delay, line.cls);
+function beamTouchOpacity(
+  xFraction,
+  dur
+) {
 
-  delay += Math.max(line.text.length * 0.06, 0.5) + 0.35;
-  y += 48;
+  const w = 0.02;
+
+
+  const centers = [
+
+    xFraction * 0.5,
+
+    0.5 +
+    (
+      1 -
+      xFraction
+    ) *
+    0.5
+  ];
+
+
+  const pts = [
+
+    [0, 0],
+
+    [1, 0]
+  ];
+
+
+  centers.forEach(
+    (c) => {
+
+      pts.push(
+
+        [
+          c - w,
+          0
+        ],
+
+        [
+          c - w * 0.3,
+          1
+        ],
+
+        [
+          c + w * 0.3,
+          1
+        ],
+
+        [
+          c + w,
+          0
+        ]
+      );
+    }
+  );
+
+
+  pts.forEach(
+    (p) => {
+
+      p[0] =
+        Math.min(
+          1,
+          Math.max(
+            0,
+            p[0]
+          )
+        );
+    }
+  );
+
+
+  pts.sort(
+    (a, b) =>
+      a[0] - b[0]
+  );
+
+
+  const keyTimes = [];
+
+  const values = [];
+
+
+  let last = -1;
+
+
+  pts.forEach(
+    ([time, opacity]) => {
+
+      if (
+        time <= last
+      ) {
+
+        if (
+          opacity >
+          values[
+            values.length - 1
+          ]
+        ) {
+
+          values[
+            values.length - 1
+          ] = opacity;
+        }
+
+        return;
+      }
+
+
+      keyTimes.push(
+        time.toFixed(4)
+      );
+
+
+      values.push(
+        opacity
+      );
+
+
+      last = time;
+    }
+  );
+
 
   if (
-    line.text === "AI Engineer" ||
-    line.text.includes("Docker")
+    keyTimes[0] !==
+    "0.0000"
   ) {
-    y += 18;
+
+    keyTimes.unshift(
+      "0.0000"
+    );
+
+    values.unshift(
+      0
+    );
   }
+
+
+  if (
+    keyTimes[
+      keyTimes.length - 1
+    ] !==
+    "1.0000"
+  ) {
+
+    keyTimes.push(
+      "1.0000"
+    );
+
+    values.push(
+      0
+    );
+  }
+
+
+  return `
+    <animate
+      attributeName="opacity"
+      dur="${dur}s"
+      repeatCount="indefinite"
+      keyTimes="${keyTimes.join(";")}"
+      values="${values.join(";")}"
+    />
+  `;
 }
 
-const cursorDelay = delay;
 
-const svg = `
+// ============================================================
+// CONTRIBUTION TARGET MARKERS
+// ============================================================
+
+function buildTargetMarkers(
+  t,
+  gridX,
+  gridY,
+  cell,
+  gap,
+  weeks,
+  max,
+  dur = JET_DUR
+) {
+
+  const step =
+    cell + gap;
+
+
+  const gridW =
+    weeks.length *
+    step;
+
+
+  const xStart =
+    gridX + 10;
+
+
+  const xEnd =
+    gridX +
+    gridW -
+    10;
+
+
+  let svg = "";
+
+
+  weeks.forEach(
+    (week, wi) => {
+
+      let best = null;
+
+
+      week
+        .contributionDays
+        .forEach(
+          (day) => {
+
+            if (
+              !best ||
+              day.contributionCount >
+                best.contributionCount
+            ) {
+
+              best = day;
+            }
+          }
+        );
+
+
+      const level =
+        best
+          ? levelFor(
+              best.contributionCount,
+              max
+            )
+          : 0;
+
+
+      if (
+        level < 3
+      ) {
+
+        return;
+      }
+
+
+      const cx =
+        gridX +
+        wi * step +
+        cell / 2;
+
+
+      const xFraction =
+        Math.min(
+          1,
+          Math.max(
+            0,
+            (
+              cx -
+              xStart
+            ) /
+            (
+              xEnd -
+              xStart
+            )
+          )
+        );
+
+
+      const x =
+        (
+          gridX +
+          wi * step -
+          1.5
+        ).toFixed(1);
+
+
+      const y =
+        (
+          gridY +
+          best.weekday *
+            step -
+          1.5
+        ).toFixed(1);
+
+
+      const size =
+        cell + 3;
+
+
+      svg += `
+        <rect
+          x="${x}"
+          y="${y}"
+          width="${size}"
+          height="${size}"
+          rx="3.5"
+          fill="none"
+          stroke="${t.marker}"
+          stroke-width="1.4"
+          opacity="0"
+        >
+          ${beamTouchOpacity(
+            xFraction,
+            dur
+          )}
+        </rect>
+      `;
+    }
+  );
+
+
+  return svg;
+}
+
+
+// ============================================================
+// MOVING PROBE / JET
+// ============================================================
+
+function buildJetLane(
+  t,
+  gridX,
+  gridY,
+  cell,
+  gap,
+  weeks,
+  max,
+  laneY,
+  dur = JET_DUR
+) {
+
+  const step =
+    cell + gap;
+
+
+  const gridW =
+    weeks.length *
+    step;
+
+
+  const xStart =
+    gridX + 10;
+
+
+  const xEnd =
+    gridX +
+    gridW -
+    10;
+
+
+  const beam =
+    buildProbeBeam(
+      t,
+      gridX,
+      gridY,
+      cell,
+      step,
+      weeks,
+      max,
+      laneY,
+      dur
+    );
+
+
+  return `
+
+    <line
+      x1="${gridX}"
+      y1="${laneY}"
+      x2="${gridX + gridW}"
+      y2="${laneY}"
+      stroke="${t.leader}"
+      stroke-width="1"
+      stroke-dasharray="2 4"
+      opacity="0.5"
+    />
+
+
+    <g
+      filter="url(#hSoftGlow)"
+    >
+
+      <animateTransform
+        attributeName="transform"
+        type="translate"
+        dur="${dur}s"
+        repeatCount="indefinite"
+        keyTimes="0;0.5;1"
+        values="
+          ${xStart},${laneY};
+          ${xEnd},${laneY};
+          ${xStart},${laneY}
+        "
+      />
+
+
+      ${beam}
+
+
+      <g
+        transform="scale(1.4)"
+      >
+
+        <ellipse
+          cx="0"
+          cy="0"
+          rx="14"
+          ry="6"
+          fill="url(#jetGlow)"
+        />
+
+
+        <circle
+          cx="-7.5"
+          cy="0"
+          r="2"
+          fill="${t.border2}"
+        >
+
+          <animate
+            attributeName="opacity"
+            values="0.35;1;0.35"
+            dur="0.9s"
+            repeatCount="indefinite"
+          />
+
+        </circle>
+
+
+        <circle
+          cx="7.5"
+          cy="0"
+          r="2"
+          fill="${t.border2}"
+        >
+
+          <animate
+            attributeName="opacity"
+            values="1;0.35;1"
+            dur="0.9s"
+            repeatCount="indefinite"
+          />
+
+        </circle>
+
+
+        <path
+          d="
+            M-9,0
+            L-3,-5
+            L3,-5
+            L9,0
+            L3,5
+            L-3,5
+            Z
+          "
+          fill="${t.accent}"
+          stroke="${t.border1}"
+          stroke-width="1"
+        />
+
+
+        <circle
+          cx="0"
+          cy="0"
+          r="2.2"
+          fill="#FFFFFF"
+        />
+
+      </g>
+
+    </g>
+  `;
+}
+
+
+// ============================================================
+// HEATMAP SVG
+// ============================================================
+
+function buildHeatmapSvg(
+  theme,
+  calendar
+) {
+
+  const t =
+    theme;
+
+
+  const weeks =
+    calendar.weeks;
+
+
+  const allDays =
+    weeks.flatMap(
+      (week) =>
+        week.contributionDays
+    );
+
+
+  const max =
+    Math.max(
+      1,
+      ...allDays.map(
+        (day) =>
+          day.contributionCount
+      )
+    );
+
+
+  const {
+    current,
+    longest
+  } =
+    computeStreaks(
+      allDays
+    );
+
+
+  const cell = 11;
+
+  const gap = 3;
+
+  const gridX = 46;
+
+  const gridY = 74;
+
+
+  const gridW =
+    weeks.length *
+    (
+      cell +
+      gap
+    );
+
+
+  const jetLaneH = 52;
+
+
+  const HEATMAP_WIDTH =
+    gridX +
+    gridW +
+    30;
+
+
+  const HEATMAP_HEIGHT =
+    gridY +
+    7 *
+      (
+        cell +
+        gap
+      ) +
+    jetLaneH +
+    46;
+
+
+  const jetLaneY =
+    gridY +
+    7 *
+      (
+        cell +
+        gap
+      ) +
+    jetLaneH /
+      2 +
+    10;
+
+
+  let cellsSvg = "";
+
+  let monthsSvg = "";
+
+  let lastMonth = -1;
+
+
+  weeks.forEach(
+    (week, wi) => {
+
+      const x =
+        gridX +
+        wi *
+          (
+            cell +
+            gap
+          );
+
+
+      const firstDay =
+        week
+          .contributionDays
+          .find(
+            (day) =>
+              day.date
+          );
+
+
+      if (
+        firstDay
+      ) {
+
+        const month =
+          new Date(
+            firstDay.date
+          ).getUTCMonth();
+
+
+        if (
+          month !==
+          lastMonth
+        ) {
+
+          monthsSvg += `
+            <text
+              x="${x}"
+              y="${gridY - 12}"
+              class="heat-month"
+            >
+              ${MONTHS[month]}
+            </text>
+          `;
+
+
+          lastMonth =
+            month;
+        }
+      }
+
+
+      week
+        .contributionDays
+        .forEach(
+          (day) => {
+
+            const y =
+              gridY +
+              day.weekday *
+                (
+                  cell +
+                  gap
+                );
+
+
+            const level =
+              levelFor(
+                day.contributionCount,
+                max
+              );
+
+
+            const delay =
+              (
+                0.15 +
+                wi *
+                  0.012
+              ).toFixed(3);
+
+
+            cellsSvg += `
+              <rect
+                x="${x}"
+                y="${y}"
+                width="${cell}"
+                height="${cell}"
+                rx="2.5"
+                fill="${t.heat[level]}"
+                opacity="0"
+              >
+
+                <animate
+                  attributeName="opacity"
+                  from="0"
+                  to="1"
+                  dur="0.35s"
+                  begin="${delay}s"
+                  fill="freeze"
+                />
+
+              </rect>
+            `;
+          }
+        );
+    }
+  );
+
+
+  const dayLabels = [
+
+    {
+      d: 1,
+      label: "Mon"
+    },
+
+    {
+      d: 3,
+      label: "Wed"
+    },
+
+    {
+      d: 5,
+      label: "Fri"
+    }
+
+  ]
+
+    .map(
+      ({
+        d,
+        label
+      }) => `
+
+        <text
+          x="${gridX - 10}"
+          y="${
+            gridY +
+            d *
+              (
+                cell +
+                gap
+              ) +
+            9
+          }"
+          text-anchor="end"
+          class="heat-daylabel"
+        >
+          ${label}
+        </text>
+      `
+    )
+
+    .join("");
+
+
+  const legendX =
+    HEATMAP_WIDTH -
+    30 -
+    t.heat.length *
+      14 -
+    46;
+
+
+  const legend =
+    t.heat
+
+      .map(
+        (
+          color,
+          index
+        ) => `
+
+          <rect
+            x="${
+              legendX +
+              34 +
+              index *
+                14
+            }"
+            y="${HEATMAP_HEIGHT - 22}"
+            width="10"
+            height="10"
+            rx="2"
+            fill="${color}"
+          />
+        `
+      )
+
+      .join("");
+
+
+  return `
 <svg
   xmlns="http://www.w3.org/2000/svg"
-  width="1000"
-  height="620"
-  viewBox="0 0 1000 620"
+  width="${HEATMAP_WIDTH}"
+  height="${HEATMAP_HEIGHT}"
+  viewBox="0 0 ${HEATMAP_WIDTH} ${HEATMAP_HEIGHT}"
+  font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
 >
 
-<style>
+<defs>
 
-  .bg {
-    fill: #0d1117;
-  }
+  <radialGradient
+    id="hbgGlow"
+    cx="18%"
+    cy="12%"
+    r="90%"
+  >
 
-  .terminal {
-    fill: #161b22;
-    stroke: #30363d;
-    stroke-width: 2;
-  }
+    <stop
+      offset="0%"
+      stop-color="${t.bg1}"
+    />
 
-  text {
-    font-family:
-      ui-monospace,
-      SFMono-Regular,
-      Menlo,
-      Monaco,
-      Consolas,
-      "Liberation Mono",
-      "Courier New",
-      monospace;
+    <stop
+      offset="100%"
+      stop-color="${t.bg0}"
+    />
 
-    font-size: 21px;
-  }
+  </radialGradient>
 
-  .normal {
-    fill: #c9d1d9;
-  }
 
-  .green {
-    fill: #3fb950;
-  }
+  <linearGradient
+    id="hBorderGrad"
+    x1="0%"
+    y1="0%"
+    x2="100%"
+    y2="100%"
+  >
 
-  .blue {
-    fill: #58a6ff;
-  }
+    <stop
+      offset="0%"
+      stop-color="${t.border0}"
+    >
 
-  .muted {
-    fill: #8b949e;
-  }
+      <animate
+        attributeName="stop-color"
+        values="
+          ${t.border0};
+          ${t.border1};
+          ${t.border2};
+          ${t.border0}
+        "
+        dur="9s"
+        repeatCount="indefinite"
+      />
 
-  .typing {
-    opacity: 0;
+    </stop>
 
-    animation:
-      show 0.01s forwards,
-      type var(--duration) steps(var(--chars), end) forwards;
 
-    animation-delay:
-      var(--delay),
-      var(--delay);
-  }
+    <stop
+      offset="100%"
+      stop-color="${t.border2}"
+    >
 
-  @keyframes show {
-    to {
-      opacity: 1;
+      <animate
+        attributeName="stop-color"
+        values="
+          ${t.border2};
+          ${t.border0};
+          ${t.border1};
+          ${t.border2}
+        "
+        dur="9s"
+        repeatCount="indefinite"
+      />
+
+    </stop>
+
+  </linearGradient>
+
+
+  <filter
+    id="hSoftGlow"
+    x="-40%"
+    y="-40%"
+    width="180%"
+    height="180%"
+  >
+
+    <feGaussianBlur
+      stdDeviation="3"
+      result="blur"
+    />
+
+
+    <feMerge>
+
+      <feMergeNode
+        in="blur"
+      />
+
+      <feMergeNode
+        in="SourceGraphic"
+      />
+
+    </feMerge>
+
+  </filter>
+
+
+  <radialGradient
+    id="jetGlow"
+    cx="50%"
+    cy="50%"
+    r="50%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="${t.accent}"
+      stop-opacity="0.55"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="${t.accent}"
+      stop-opacity="0"
+    />
+
+  </radialGradient>
+
+
+  <clipPath
+    id="hFrameClip"
+  >
+
+    <rect
+      x="1"
+      y="1"
+      width="${HEATMAP_WIDTH - 2}"
+      height="${HEATMAP_HEIGHT - 2}"
+      rx="14"
+    />
+
+  </clipPath>
+
+
+  <style>
+
+    .heat-term {
+      fill: ${t.textDim};
+      font-size: 13px;
     }
-  }
 
-  @keyframes type {
-    from {
-      clip-path: inset(0 100% 0 0);
+
+    .heat-stats {
+      fill: ${t.text};
+      font-size: 12.5px;
     }
 
-    to {
-      clip-path: inset(0 0 0 0);
+
+    .heat-accent {
+      fill: ${t.accent};
+      font-weight: 700;
     }
-  }
 
-  .cursor {
-    opacity: 0;
-    fill: #3fb950;
 
-    animation:
-      cursor-show 0.01s forwards,
-      blink 0.8s step-end infinite;
-
-    animation-delay:
-      ${cursorDelay}s,
-      ${cursorDelay}s;
-  }
-
-  @keyframes cursor-show {
-    to {
-      opacity: 1;
+    .heat-month {
+      fill: ${t.textDim};
+      font-size: 10px;
     }
-  }
 
-  @keyframes blink {
-    50% {
-      opacity: 0;
+
+    .heat-daylabel {
+      fill: ${t.textDim};
+      font-size: 9.5px;
     }
-  }
-
-</style>
 
 
-<!-- Background -->
+    .heat-legend {
+      fill: ${t.textDim};
+      font-size: 10px;
+    }
+
+  </style>
+
+</defs>
+
+
+<g
+  clip-path="url(#hFrameClip)"
+>
+
+  <rect
+    x="0"
+    y="0"
+    width="${HEATMAP_WIDTH}"
+    height="${HEATMAP_HEIGHT}"
+    fill="url(#hbgGlow)"
+  />
+
+
+  <rect
+    x="0"
+    y="0"
+    width="${HEATMAP_WIDTH}"
+    height="46"
+    fill="${t.panel}"
+  />
+
+
+  <line
+    x1="0"
+    y1="46"
+    x2="${HEATMAP_WIDTH}"
+    y2="46"
+    stroke="${t.leader}"
+    stroke-width="1"
+  />
+
+
+  <text
+    x="24"
+    y="28"
+    class="heat-term"
+  >
+    ${USERNAME}@github ~ % ./contributions.sh --year
+  </text>
+
+
+  <text
+    x="${HEATMAP_WIDTH - 24}"
+    y="28"
+    text-anchor="end"
+    class="heat-stats"
+  >
+
+    <tspan
+      class="heat-accent"
+    >
+      ${calendar.totalContributions.toLocaleString()}
+    </tspan>
+
+    contributions · streak
+
+    <tspan
+      class="heat-accent"
+    >
+      ${current}d
+    </tspan>
+
+    · best
+
+    <tspan
+      class="heat-accent"
+    >
+      ${longest}d
+    </tspan>
+
+  </text>
+
+
+  ${monthsSvg}
+
+  ${dayLabels}
+
+  ${cellsSvg}
+
+
+  ${buildTargetMarkers(
+    t,
+    gridX,
+    gridY,
+    cell,
+    gap,
+    weeks,
+    max
+  )}
+
+
+  ${buildJetLane(
+    t,
+    gridX,
+    gridY,
+    cell,
+    gap,
+    weeks,
+    max,
+    jetLaneY
+  )}
+
+
+  <text
+    x="${legendX}"
+    y="${HEATMAP_HEIGHT - 14}"
+    class="heat-legend"
+  >
+    Less
+  </text>
+
+
+  ${legend}
+
+
+  <text
+    x="${
+      legendX +
+      34 +
+      t.heat.length *
+        14 +
+      8
+    }"
+    y="${HEATMAP_HEIGHT - 14}"
+    class="heat-legend"
+  >
+    More
+  </text>
+
+</g>
+
+
 <rect
-  class="bg"
-  width="1000"
-  height="620"
-  rx="18"
-/>
-
-
-<!-- Terminal -->
-<rect
-  class="terminal"
-  x="20"
-  y="20"
-  width="960"
-  height="580"
+  x="1"
+  y="1"
+  width="${HEATMAP_WIDTH - 2}"
+  height="${HEATMAP_HEIGHT - 2}"
   rx="14"
-/>
-
-
-<!-- Window controls -->
-<circle cx="55" cy="50" r="7" fill="#ff5f56"/>
-<circle cx="80" cy="50" r="7" fill="#ffbd2e"/>
-<circle cx="105" cy="50" r="7" fill="#27c93f"/>
-
-
-<!-- Title -->
-<text
-  x="140"
-  y="58"
-  class="muted"
->
-  borjan@github: ~/profile
-</text>
-
-
-${content}
-
-
-<!-- Final prompt -->
-<text
-  x="55"
-  y="565"
-  class="green"
->
-  $
-</text>
-
-<rect
-  x="78"
-  y="546"
-  width="12"
-  height="23"
-  class="cursor"
+  fill="none"
+  stroke="url(#hBorderGrad)"
+  stroke-width="2"
+  filter="url(#hSoftGlow)"
 />
 
 </svg>
 `;
+}
 
-fs.writeFileSync("profile.svg", svg);
+// ============================================================
+// REVEAL ANIMATION
+// ============================================================
 
-console.log("✓ Generated typing terminal");
+function reveal(
+  id,
+  x,
+  y,
+  w,
+  h,
+  delay
+) {
+
+  return `
+    <clipPath id="${id}">
+      <rect
+        x="${x}"
+        y="${y}"
+        width="0"
+        height="${h}"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="${w}"
+          dur="0.4s"
+          begin="${delay}s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  `;
+}
+
+
+// ============================================================
+// BORJAN PROFILE CONTENT
+// ============================================================
+
+function buildSections(stats) {
+
+  return [
+
+    {
+      title: "SYSTEM.INFO",
+
+      lines: [
+
+        kv(
+          "Name",
+          "Borjan Ladinski"
+        ),
+
+        kv(
+          "Role",
+          "AI Engineer"
+        ),
+
+        kv(
+          "Focus",
+          "AI systems & intelligent applications"
+        ),
+
+        kv(
+          "Specialty",
+          "Applied AI & Backend Engineering"
+        ),
+
+        kv(
+          "Status",
+          "Building & learning"
+        )
+      ]
+    },
+
+
+    {
+      title: "TECH.STACK",
+
+      lines: [
+
+        kv(
+          "Language",
+          "Python"
+        ),
+
+        kv(
+          "Backend",
+          "FastAPI"
+        ),
+
+        kv(
+          "AI / ML",
+          "PyTorch · Hugging Face"
+        ),
+
+        kv(
+          "Tools",
+          "Docker · Git · GitHub Actions"
+        )
+      ]
+    },
+
+
+    {
+      title: "CONTACT",
+
+      lines: [
+
+        kv(
+          "GitHub",
+          `${USERNAME} · ${stats.repos} repos · ${stats.followers} followers`
+        )
+      ]
+    }
+  ];
+}
+
+
+// ============================================================
+// RIGHT PANEL LAYOUT
+// ============================================================
+
+function layoutRight(
+  sections
+) {
+
+  let clipDefs = "";
+
+  let svg = "";
+
+  let y =
+    PANEL_Y + 28;
+
+  let delay = 0.9;
+
+  let lineIndex = 0;
+
+
+  sections.forEach(
+    (
+      section,
+      sectionIndex
+    ) => {
+
+      if (
+        sectionIndex > 0
+      ) {
+
+        svg += `
+          <line
+            x1="${RIGHT_X}"
+            y1="${
+              y -
+              SECTION_TITLE_GAP +
+              12
+            }"
+            x2="${RIGHT_X + RIGHT_W}"
+            y2="${
+              y -
+              SECTION_TITLE_GAP +
+              12
+            }"
+            class="divider"
+          />
+        `;
+      }
+
+
+      svg += `
+        <text
+          x="${RIGHT_X}"
+          y="${y}"
+          class="panel-title"
+        >
+          ${section.title}
+        </text>
+      `;
+
+
+      y +=
+        SECTION_TITLE_GAP;
+
+
+      section.lines.forEach(
+        (line) => {
+
+          const id =
+            `r${lineIndex}`;
+
+
+          clipDefs +=
+            reveal(
+              id,
+              RIGHT_X,
+              y - 14,
+              RIGHT_W,
+              20,
+              delay
+            );
+
+
+          svg += `
+            <g
+              clip-path="url(#${id})"
+            >
+
+              <text
+                x="${RIGHT_X}"
+                y="${y}"
+                class="kv-label"
+              >
+                ${line.label}
+              </text>
+
+
+              <text
+                x="${
+                  RIGHT_X +
+                  line.label.length *
+                    7.1
+                }"
+                y="${y}"
+                class="kv-dots"
+              >
+                ${line.dots}
+              </text>
+
+
+              <text
+                x="${
+                  RIGHT_X +
+                  RIGHT_W
+                }"
+                y="${y}"
+                text-anchor="end"
+                class="kv-value"
+              >
+                ${line.value}
+              </text>
+
+            </g>
+          `;
+
+
+          y +=
+            LINE_H;
+
+
+          delay +=
+            0.08;
+
+
+          lineIndex +=
+            1;
+        }
+      );
+
+
+      if (
+        sectionIndex <
+        sections.length - 1
+      ) {
+
+        y +=
+          SECTION_GAP -
+          LINE_H;
+      }
+    }
+  );
+
+
+  const contentHeight =
+    y -
+    PANEL_Y;
+
+
+  return {
+
+    svg,
+
+    clipDefs,
+
+    contentHeight
+  };
+}
+
+
+// ============================================================
+// MAIN PROFILE SVG
+// ============================================================
+
+function buildSvg(
+  theme,
+  asciiRows,
+  stats,
+  updatedAt
+) {
+
+  const t =
+    theme;
+
+
+  const sections =
+    buildSections(
+      stats
+    );
+
+
+  const {
+    svg: infoSvg,
+    clipDefs,
+    contentHeight
+  } =
+    layoutRight(
+      sections
+    );
+
+
+  const panelHeight =
+    contentHeight + 24;
+
+
+  const HEIGHT =
+    PANEL_Y +
+    panelHeight +
+    62;
+
+
+  const asciiLineHeight =
+    (
+      panelHeight -
+      44
+    ) /
+    asciiRows.length;
+
+
+  const asciiSvg =
+    asciiRows
+
+      .map(
+        (
+          row,
+          index
+        ) => `
+
+          <text
+            x="${PANEL_X + 14}"
+            y="${
+              PANEL_Y +
+              26 +
+              index *
+                asciiLineHeight
+            }"
+            textLength="${LEFT_W - 28}"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+            ${row}
+          </text>
+        `
+      )
+
+      .join("");
+
+
+  return `
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="${WIDTH}"
+  height="${HEIGHT}"
+  viewBox="0 0 ${WIDTH} ${HEIGHT}"
+  font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+>
+
+<defs>
+
+
+  <!-- Main background -->
+
+  <radialGradient
+    id="bgGlow"
+    cx="24%"
+    cy="14%"
+    r="85%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="${t.bg1}"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="${t.bg0}"
+    />
+
+  </radialGradient>
+
+
+  <!-- Animated outer border -->
+
+  <linearGradient
+    id="borderGrad"
+    x1="0%"
+    y1="0%"
+    x2="100%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="${t.border0}"
+    >
+
+      <animate
+        attributeName="stop-color"
+        values="${t.border0};${t.border1};${t.border2};${t.border0}"
+        dur="9s"
+        repeatCount="indefinite"
+      />
+
+    </stop>
+
+
+    <stop
+      offset="100%"
+      stop-color="${t.border2}"
+    >
+
+      <animate
+        attributeName="stop-color"
+        values="${t.border2};${t.border0};${t.border1};${t.border2}"
+        dur="9s"
+        repeatCount="indefinite"
+      />
+
+    </stop>
+
+  </linearGradient>
+
+
+  <!-- ASCII portrait gradient -->
+
+  <linearGradient
+    id="asciiGrad"
+    x1="0%"
+    y1="0%"
+    x2="100%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="${t.accent}"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="${t.border1}"
+    />
+
+  </linearGradient>
+
+
+  <!-- Terminal scanlines -->
+
+  <pattern
+    id="scanlines"
+    width="3"
+    height="3"
+    patternUnits="userSpaceOnUse"
+  >
+
+    <rect
+      width="3"
+      height="1"
+      fill="${t.scan}"
+      opacity="0.045"
+    />
+
+  </pattern>
+
+
+  <!-- Scanning beam -->
+
+  <linearGradient
+    id="scanBeam"
+    x1="0%"
+    y1="0%"
+    x2="0%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="${t.scan}"
+      stop-opacity="0"
+    />
+
+    <stop
+      offset="50%"
+      stop-color="${t.scan}"
+      stop-opacity="0.22"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="${t.scan}"
+      stop-opacity="0"
+    />
+
+  </linearGradient>
+
+
+  <!-- Glow -->
+
+  <filter
+    id="softGlow"
+    x="-40%"
+    y="-40%"
+    width="180%"
+    height="180%"
+  >
+
+    <feGaussianBlur
+      stdDeviation="3"
+      result="blur"
+    />
+
+
+    <feMerge>
+
+      <feMergeNode
+        in="blur"
+      />
+
+      <feMergeNode
+        in="SourceGraphic"
+      />
+
+    </feMerge>
+
+  </filter>
+
+
+  <!-- Main frame -->
+
+  <clipPath
+    id="frameClip"
+  >
+
+    <rect
+      x="1"
+      y="1"
+      width="${WIDTH - 2}"
+      height="${HEIGHT - 2}"
+      rx="14"
+    />
+
+  </clipPath>
+
+
+  ${clipDefs}
+
+
+  <style>
+
+    .term-label {
+      fill: ${t.textDim};
+      font-size: 13px;
+    }
+
+
+    .panel-title {
+      fill: ${t.accent};
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+
+    .kv-label {
+      fill: ${t.accent};
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+
+    .kv-dots {
+      fill: ${t.leader};
+      font-size: 13px;
+    }
+
+
+    .kv-value {
+      fill: ${t.text};
+      font-size: 13px;
+    }
+
+
+    .ascii-row {
+      fill: url(#asciiGrad);
+      font-size: 8.6px;
+      white-space: pre;
+    }
+
+
+    .divider {
+      stroke: ${t.leader};
+      stroke-width: 1;
+    }
+
+
+    .foot {
+      fill: ${t.textDim};
+      font-size: 11.5px;
+    }
+
+  </style>
+
+</defs>
+
+
+<g
+  clip-path="url(#frameClip)"
+>
+
+
+  <!-- Background -->
+
+  <rect
+    x="0"
+    y="0"
+    width="${WIDTH}"
+    height="${HEIGHT}"
+    fill="url(#bgGlow)"
+  />
+
+
+  <rect
+    x="0"
+    y="0"
+    width="${WIDTH}"
+    height="${HEIGHT}"
+    fill="url(#scanlines)"
+  />
+
+
+  <!-- ====================================================== -->
+  <!-- TERMINAL TITLE BAR -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="0"
+    y="0"
+    width="${WIDTH}"
+    height="46"
+    fill="${t.panel}"
+  />
+
+
+  <line
+    x1="0"
+    y1="46"
+    x2="${WIDTH}"
+    y2="46"
+    stroke="${t.leader}"
+    stroke-width="1"
+  />
+
+
+  <!-- macOS-style terminal buttons -->
+
+  <circle
+    cx="26"
+    cy="23"
+    r="6.5"
+    fill="#FF5F56"
+  />
+
+
+  <circle
+    cx="47"
+    cy="23"
+    r="6.5"
+    fill="#FFBD2E"
+  />
+
+
+  <circle
+    cx="68"
+    cy="23"
+    r="6.5"
+    fill="#27C93F"
+  />
+
+
+  <!-- Terminal command -->
+
+  <text
+    x="${WIDTH / 2}"
+    y="28"
+    text-anchor="middle"
+    class="term-label"
+  >
+    ${USERNAME}@github ~ % ./profile.sh --live
+  </text>
+
+
+  <!-- LIVE indicator -->
+
+  <circle
+    cx="${WIDTH - 96}"
+    cy="23"
+    r="4"
+    fill="${t.accent}"
+  >
+
+    <animate
+      attributeName="opacity"
+      values="1;0.25;1"
+      dur="1.6s"
+      repeatCount="indefinite"
+    />
+
+  </circle>
+
+
+  <text
+    x="${WIDTH - 86}"
+    y="28"
+    class="term-label"
+  >
+    LIVE
+  </text>
+
+
+  <!-- ====================================================== -->
+  <!-- LEFT ASCII PANEL -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="${PANEL_X}"
+    y="${PANEL_Y}"
+    width="${LEFT_W}"
+    height="${panelHeight}"
+    rx="10"
+    fill="${t.panelAlt}"
+    stroke="${t.leader}"
+    stroke-width="1"
+  />
+
+
+  <text
+    x="${PANEL_X + 14}"
+    y="${PANEL_Y + 14}"
+    class="panel-title"
+  >
+    VISUAL.MAP
+  </text>
+
+
+  <g
+    transform="translate(0,10)"
+  >
+
+    ${asciiSvg}
+
+  </g>
+
+
+  <!-- ====================================================== -->
+  <!-- RIGHT INFORMATION PANEL -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="${RIGHT_X - 20}"
+    y="${PANEL_Y}"
+    width="${RIGHT_W + 40}"
+    height="${panelHeight}"
+    rx="10"
+    fill="${t.panelAlt}"
+    stroke="${t.leader}"
+    stroke-width="1"
+  />
+
+
+  ${infoSvg}
+
+
+  <!-- ====================================================== -->
+  <!-- FOOTER -->
+  <!-- ====================================================== -->
+
+  <line
+    x1="${PANEL_X}"
+    y1="${HEIGHT - 36}"
+    x2="${WIDTH - PANEL_X}"
+    y2="${HEIGHT - 36}"
+    stroke="${t.leader}"
+    stroke-width="1"
+  />
+
+
+  <text
+    x="${PANEL_X}"
+    y="${HEIGHT - 15}"
+    class="foot"
+  >
+    Live GitHub stats + contribution activity below ↓
+  </text>
+
+
+  <text
+    x="${WIDTH - PANEL_X}"
+    y="${HEIGHT - 15}"
+    text-anchor="end"
+    class="foot"
+  >
+    synced ${updatedAt}
+  </text>
+
+
+  <!-- ====================================================== -->
+  <!-- MOVING SCAN -->
+  <!-- ====================================================== -->
+
+  <g>
+
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="
+        0,-30;
+        0,${HEIGHT + 30}
+      "
+      dur="7s"
+      repeatCount="indefinite"
+    />
+
+
+    <rect
+      x="0"
+      y="-18"
+      width="${WIDTH}"
+      height="36"
+      fill="url(#scanBeam)"
+    />
+
+
+    <line
+      x1="0"
+      y1="0"
+      x2="${WIDTH}"
+      y2="0"
+      stroke="${t.scan}"
+      stroke-width="1.5"
+      opacity="0.95"
+    />
+
+
+    <circle
+      cx="10"
+      cy="0"
+      r="2.5"
+      fill="${t.scan}"
+      filter="url(#softGlow)"
+    />
+
+
+    <circle
+      cx="${WIDTH - 10}"
+      cy="0"
+      r="2.5"
+      fill="${t.scan}"
+      filter="url(#softGlow)"
+    />
+
+  </g>
+
+</g>
+
+
+<!-- Animated outside border -->
+
+<rect
+  x="1"
+  y="1"
+  width="${WIDTH - 2}"
+  height="${HEIGHT - 2}"
+  rx="14"
+  fill="none"
+  stroke="url(#borderGrad)"
+  stroke-width="2"
+  filter="url(#softGlow)"
+/>
+
+
+</svg>
+`;
+}
+
+
+// ============================================================
+// GENERATE FILES
+// ============================================================
+
+async function main() {
+
+  console.log(
+    "Generating Ladinski profile..."
+  );
+
+
+  const asciiRows =
+    await buildAscii(
+      "avatar.png"
+    );
+
+
+  const stats =
+    await fetchGitHubStats();
+
+
+  const calendar =
+    await fetchContributionCalendar();
+
+
+  const updatedAt =
+    new Date()
+      .toISOString()
+      .slice(0, 16)
+      .replace(
+        "T",
+        " "
+      ) +
+    " UTC";
+
+
+  for (
+    const theme of
+    Object.values(THEMES)
+  ) {
+
+    const svg =
+      buildSvg(
+        theme,
+        asciiRows,
+        stats,
+        updatedAt
+      );
+
+
+    await writeFile(
+      `${theme.name}.svg`,
+      svg,
+      "utf8"
+    );
+
+
+    console.log(
+      `wrote ${theme.name}.svg`
+    );
+
+
+    const heatmap =
+      buildHeatmapSvg(
+        theme,
+        calendar
+      );
+
+
+    await writeFile(
+      `heatmap-${theme.name}.svg`,
+      heatmap,
+      "utf8"
+    );
+
+
+    console.log(
+      `wrote heatmap-${theme.name}.svg`
+    );
+  }
+
+
+  console.log(
+    "✓ Profile generation complete"
+  );
+}
+
+
+main().catch(
+  (error) => {
+
+    console.error(
+      "Generation failed:"
+    );
+
+    console.error(
+      error
+    );
+
+    process.exit(1);
+  }
+);

@@ -1,0 +1,1566 @@
+
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="1180"
+  height="552"
+  viewBox="0 0 1180 552"
+  font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+>
+
+<defs>
+
+
+  <!-- Main background -->
+
+  <radialGradient
+    id="bgGlow"
+    cx="24%"
+    cy="14%"
+    r="85%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="#0B1120"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="#050816"
+    />
+
+  </radialGradient>
+
+
+  <!-- Animated outer border -->
+
+  <linearGradient
+    id="borderGrad"
+    x1="0%"
+    y1="0%"
+    x2="100%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="#22C55E"
+    >
+
+      <animate
+        attributeName="stop-color"
+        values="#22C55E;#10B981;#34D399;#22C55E"
+        dur="9s"
+        repeatCount="indefinite"
+      />
+
+    </stop>
+
+
+    <stop
+      offset="100%"
+      stop-color="#34D399"
+    >
+
+      <animate
+        attributeName="stop-color"
+        values="#34D399;#22C55E;#10B981;#34D399"
+        dur="9s"
+        repeatCount="indefinite"
+      />
+
+    </stop>
+
+  </linearGradient>
+
+
+  <!-- ASCII portrait gradient -->
+
+  <linearGradient
+    id="asciiGrad"
+    x1="0%"
+    y1="0%"
+    x2="100%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="#38BDF8"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="#10B981"
+    />
+
+  </linearGradient>
+
+
+  <!-- Terminal scanlines -->
+
+  <pattern
+    id="scanlines"
+    width="3"
+    height="3"
+    patternUnits="userSpaceOnUse"
+  >
+
+    <rect
+      width="3"
+      height="1"
+      fill="#7DD3FC"
+      opacity="0.045"
+    />
+
+  </pattern>
+
+
+  <!-- Scanning beam -->
+
+  <linearGradient
+    id="scanBeam"
+    x1="0%"
+    y1="0%"
+    x2="0%"
+    y2="100%"
+  >
+
+    <stop
+      offset="0%"
+      stop-color="#7DD3FC"
+      stop-opacity="0"
+    />
+
+    <stop
+      offset="50%"
+      stop-color="#7DD3FC"
+      stop-opacity="0.22"
+    />
+
+    <stop
+      offset="100%"
+      stop-color="#7DD3FC"
+      stop-opacity="0"
+    />
+
+  </linearGradient>
+
+
+  <!-- Glow -->
+
+  <filter
+    id="softGlow"
+    x="-40%"
+    y="-40%"
+    width="180%"
+    height="180%"
+  >
+
+    <feGaussianBlur
+      stdDeviation="3"
+      result="blur"
+    />
+
+
+    <feMerge>
+
+      <feMergeNode
+        in="blur"
+      />
+
+      <feMergeNode
+        in="SourceGraphic"
+      />
+
+    </feMerge>
+
+  </filter>
+
+
+  <!-- Main frame -->
+
+  <clipPath
+    id="frameClip"
+  >
+
+    <rect
+      x="1"
+      y="1"
+      width="1178"
+      height="550"
+      rx="14"
+    />
+
+  </clipPath>
+
+
+  
+    <clipPath id="r0">
+      <rect
+        x="550"
+        y="132"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="0.9s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r1">
+      <rect
+        x="550"
+        y="157"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="0.98s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r2">
+      <rect
+        x="550"
+        y="182"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.06s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r3">
+      <rect
+        x="550"
+        y="207"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.1400000000000001s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r4">
+      <rect
+        x="550"
+        y="232"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.2200000000000002s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r5">
+      <rect
+        x="550"
+        y="292"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.3000000000000003s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r6">
+      <rect
+        x="550"
+        y="317"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.3800000000000003s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r7">
+      <rect
+        x="550"
+        y="342"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.4600000000000004s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r8">
+      <rect
+        x="550"
+        y="367"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.5400000000000005s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+    <clipPath id="r9">
+      <rect
+        x="550"
+        y="427"
+        width="0"
+        height="20"
+      >
+        <animate
+          attributeName="width"
+          from="0"
+          to="590"
+          dur="0.4s"
+          begin="1.6200000000000006s"
+          fill="freeze"
+          calcMode="spline"
+          keySplines="0.3 0 0.2 1"
+        />
+      </rect>
+    </clipPath>
+  
+
+
+  <style>
+
+    .term-label {
+      fill: #64748B;
+      font-size: 13px;
+    }
+
+
+    .panel-title {
+      fill: #38BDF8;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 2px;
+    }
+
+
+    .kv-label {
+      fill: #38BDF8;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+
+    .kv-dots {
+      fill: #1E293B;
+      font-size: 13px;
+    }
+
+
+    .kv-value {
+      fill: #E2E8F0;
+      font-size: 13px;
+    }
+
+
+    .ascii-row {
+      fill: url(#asciiGrad);
+      font-size: 8.6px;
+      white-space: pre;
+    }
+
+
+    .divider {
+      stroke: #1E293B;
+      stroke-width: 1;
+    }
+
+
+    .foot {
+      fill: #64748B;
+      font-size: 11.5px;
+    }
+
+  </style>
+
+</defs>
+
+
+<g
+  clip-path="url(#frameClip)"
+>
+
+
+  <!-- Background -->
+
+  <rect
+    x="0"
+    y="0"
+    width="1180"
+    height="552"
+    fill="url(#bgGlow)"
+  />
+
+
+  <rect
+    x="0"
+    y="0"
+    width="1180"
+    height="552"
+    fill="url(#scanlines)"
+  />
+
+
+  <!-- ====================================================== -->
+  <!-- TERMINAL TITLE BAR -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="0"
+    y="0"
+    width="1180"
+    height="46"
+    fill="#0A0F1E"
+  />
+
+
+  <line
+    x1="0"
+    y1="46"
+    x2="1180"
+    y2="46"
+    stroke="#1E293B"
+    stroke-width="1"
+  />
+
+
+  <!-- macOS-style terminal buttons -->
+
+  <circle
+    cx="26"
+    cy="23"
+    r="6.5"
+    fill="#FF5F56"
+  />
+
+
+  <circle
+    cx="47"
+    cy="23"
+    r="6.5"
+    fill="#FFBD2E"
+  />
+
+
+  <circle
+    cx="68"
+    cy="23"
+    r="6.5"
+    fill="#27C93F"
+  />
+
+
+  <!-- Terminal command -->
+
+  <text
+    x="590"
+    y="28"
+    text-anchor="middle"
+    class="term-label"
+  >
+    Ladinski@github ~ % ./profile.sh --live
+  </text>
+
+
+  <!-- LIVE indicator -->
+
+  <circle
+    cx="1084"
+    cy="23"
+    r="4"
+    fill="#38BDF8"
+  >
+
+    <animate
+      attributeName="opacity"
+      values="1;0.25;1"
+      dur="1.6s"
+      repeatCount="indefinite"
+    />
+
+  </circle>
+
+
+  <text
+    x="1094"
+    y="28"
+    class="term-label"
+  >
+    LIVE
+  </text>
+
+
+  <!-- ====================================================== -->
+  <!-- LEFT ASCII PANEL -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="40"
+    y="92"
+    width="470"
+    height="398"
+    rx="10"
+    fill="#0E1729"
+    stroke="#1E293B"
+    stroke-width="1"
+  />
+
+
+  <text
+    x="54"
+    y="106"
+    class="panel-title"
+  >
+    VISUAL.MAP
+  </text>
+
+
+  <g
+    transform="translate(0,10)"
+  >
+
+    
+
+          <text
+            x="54"
+            y="118"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                   ....................           
+          </text>
+        
+
+          <text
+            x="54"
+            y="126.42857142857143"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                  ...::::::::::::::......         
+          </text>
+        
+
+          <text
+            x="54"
+            y="134.85714285714286"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                  ...::::::::::::::::.....        
+          </text>
+        
+
+          <text
+            x="54"
+            y="143.28571428571428"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                  ..::::-------::::::::....       
+          </text>
+        
+
+          <text
+            x="54"
+            y="151.71428571428572"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                 ...:::-------------::::...       
+          </text>
+        
+
+          <text
+            x="54"
+            y="160.14285714285714"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                ....:::--------------::::...      
+          </text>
+        
+
+          <text
+            x="54"
+            y="168.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                               ....::::---=======-----::::...     
+          </text>
+        
+
+          <text
+            x="54"
+            y="177"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                               ...::::--===========----:::....    
+          </text>
+        
+
+          <text
+            x="54"
+            y="185.42857142857144"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                              ....:-#%%+=============---:::...    
+          </text>
+        
+
+          <text
+            x="54"
+            y="193.85714285714286"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                              ...:+%#@@@@+============---::....   
+          </text>
+        
+
+          <text
+            x="54"
+            y="202.28571428571428"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                             ..-:-% -@@@@@++++++=======--:::...   
+          </text>
+        
+
+          <text
+            x="54"
+            y="210.71428571428572"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                             .  ### #@@@@@%+++++++=====---::....  
+          </text>
+        
+
+          <text
+            x="54"
+            y="219.14285714285714"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                            ..   %%*#%%@@@@*+++++++=====--:::...  
+          </text>
+        
+
+          <text
+            x="54"
+            y="227.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                            ..    #@+**#%%@#++++++++====---::.... 
+          </text>
+        
+
+          <text
+            x="54"
+            y="236"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                            ..     .=++*##%#++++++++=====--:::... 
+          </text>
+        
+
+          <text
+            x="54"
+            y="244.42857142857144"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                            ..:    .-==++*#*+++++++++====--:::....
+          </text>
+        
+
+          <text
+            x="54"
+            y="252.85714285714286"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                           ...:   ---==+++**+++++++++====---:::...
+          </text>
+        
+
+          <text
+            x="54"
+            y="261.2857142857143"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                           ...::.----==+++*+++++++++++====--:::==.
+          </text>
+        
+
+          <text
+            x="54"
+            y="269.7142857142857"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                 .:        ...::---====++**+++++++++++====--::: :-
+          </text>
+        
+
+          <text
+            x="54"
+            y="278.1428571428571"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                  .:       ..:::-=*##+=+*#*++++++++++++===---:- *=
+          </text>
+        
+
+          <text
+            x="54"
+            y="286.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                  -%  :    ..::-*@@@@@@%**+++*@*+++++++===---   *#
+          </text>
+        
+
+          <text
+            x="54"
+            y="295"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                   =..     ..::+%@@@@@@@@%*+*@@@+++++++===--:. *=.
+          </text>
+        
+
+          <text
+            x="54"
+            y="303.42857142857144"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                           ..::+#%%%@@@@@@@@@@@@+++++++====-+#-   
+          </text>
+        
+
+          <text
+            x="54"
+            y="311.8571428571429"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                           ....=**#%%%@@@@@@@@@@*++++++====-+     
+          </text>
+        
+
+          <text
+            x="54"
+            y="320.2857142857143"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                       -  .....:-=**###%%@@@@@@@%++++++===-       
+          </text>
+        
+
+          <text
+            x="54"
+            y="328.7142857142857"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                  .    -:  .....:--=++++*#%@@@@@%*+++++==-        
+          </text>
+        
+
+          <text
+            x="54"
+            y="337.1428571428571"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                  -.    *=   .....::----=+#%%@@@%#+++++=-     . =*
+          </text>
+        
+
+          <text
+            x="54"
+            y="345.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                        @@=   ......::---=+*#%@@@@*=*+#:.    :.-*#
+          </text>
+        
+
+          <text
+            x="54"
+            y="354"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                          .    .....::----==++#%*. =-=.     .:.:*=
+          </text>
+        
+
+          <text
+            x="54"
+            y="362.42857142857144"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                ...::::-=+****#**: .:+-.:-  :.  **
+          </text>
+        
+
+          <text
+            x="54"
+            y="370.8571428571429"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                            ..      ::=+=++#:.+%@--=*#+.          
+          </text>
+        
+
+          <text
+            x="54"
+            y="379.2857142857143"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                   ..           .   -=*=----==:=*+##=             
+          </text>
+        
+
+          <text
+            x="54"
+            y="387.7142857142857"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                           .    ...:.:--------::-*#=              
+          </text>
+        
+
+          <text
+            x="54"
+            y="396.14285714285717"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                  ....:--=----::.--   .   .:::....
+          </text>
+        
+
+          <text
+            x="54"
+            y="404.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                             ..      .:::-----:   .:======---::...
+          </text>
+        
+
+          <text
+            x="54"
+            y="413"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                             ...::::.  ...::::.:-=========--:::.. 
+          </text>
+        
+
+          <text
+            x="54"
+            y="421.42857142857144"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                              ...:::-----================---::... 
+          </text>
+        
+
+          <text
+            x="54"
+            y="429.8571428571429"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                              ...::::----===============---::...  
+          </text>
+        
+
+          <text
+            x="54"
+            y="438.2857142857143"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                               ...:::------===========----::...   
+          </text>
+        
+
+          <text
+            x="54"
+            y="446.7142857142857"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                ...::::-------=====-----:::...    
+          </text>
+        
+
+          <text
+            x="54"
+            y="455.14285714285717"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                 ...::::::------------::::...     
+          </text>
+        
+
+          <text
+            x="54"
+            y="463.57142857142856"
+            textLength="442"
+            lengthAdjust="spacingAndGlyphs"
+            class="ascii-row"
+          >
+                                  .....:::::::------::::....      
+          </text>
+        
+
+  </g>
+
+
+  <!-- ====================================================== -->
+  <!-- RIGHT INFORMATION PANEL -->
+  <!-- ====================================================== -->
+
+  <rect
+    x="530"
+    y="92"
+    width="630"
+    height="398"
+    rx="10"
+    fill="#0E1729"
+    stroke="#1E293B"
+    stroke-width="1"
+  />
+
+
+  
+        <text
+          x="550"
+          y="120"
+          class="panel-title"
+        >
+          SYSTEM.INFO
+        </text>
+      
+            <g
+              clip-path="url(#r0)"
+            >
+
+              <text
+                x="550"
+                y="146"
+                class="kv-label"
+              >
+                Name:
+              </text>
+
+
+              <text
+                x="585.5"
+                y="146"
+                class="kv-dots"
+              >
+                .............
+              </text>
+
+
+              <text
+                x="1140"
+                y="146"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Borjan Ladinski
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r1)"
+            >
+
+              <text
+                x="550"
+                y="171"
+                class="kv-label"
+              >
+                Role:
+              </text>
+
+
+              <text
+                x="585.5"
+                y="171"
+                class="kv-dots"
+              >
+                .............
+              </text>
+
+
+              <text
+                x="1140"
+                y="171"
+                text-anchor="end"
+                class="kv-value"
+              >
+                AI Engineer
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r2)"
+            >
+
+              <text
+                x="550"
+                y="196"
+                class="kv-label"
+              >
+                Focus:
+              </text>
+
+
+              <text
+                x="592.6"
+                y="196"
+                class="kv-dots"
+              >
+                ............
+              </text>
+
+
+              <text
+                x="1140"
+                y="196"
+                text-anchor="end"
+                class="kv-value"
+              >
+                AI systems &amp; intelligent applications
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r3)"
+            >
+
+              <text
+                x="550"
+                y="221"
+                class="kv-label"
+              >
+                Specialty:
+              </text>
+
+
+              <text
+                x="621"
+                y="221"
+                class="kv-dots"
+              >
+                ........
+              </text>
+
+
+              <text
+                x="1140"
+                y="221"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Applied AI &amp; Backend Engineering
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r4)"
+            >
+
+              <text
+                x="550"
+                y="246"
+                class="kv-label"
+              >
+                Status:
+              </text>
+
+
+              <text
+                x="599.7"
+                y="246"
+                class="kv-dots"
+              >
+                ...........
+              </text>
+
+
+              <text
+                x="1140"
+                y="246"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Building &amp; learning
+              </text>
+
+            </g>
+          
+          <line
+            x1="550"
+            y1="266"
+            x2="1140"
+            y2="266"
+            class="divider"
+          />
+        
+        <text
+          x="550"
+          y="280"
+          class="panel-title"
+        >
+          TECH.STACK
+        </text>
+      
+            <g
+              clip-path="url(#r5)"
+            >
+
+              <text
+                x="550"
+                y="306"
+                class="kv-label"
+              >
+                Language:
+              </text>
+
+
+              <text
+                x="613.9"
+                y="306"
+                class="kv-dots"
+              >
+                .........
+              </text>
+
+
+              <text
+                x="1140"
+                y="306"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Python
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r6)"
+            >
+
+              <text
+                x="550"
+                y="331"
+                class="kv-label"
+              >
+                Backend:
+              </text>
+
+
+              <text
+                x="606.8"
+                y="331"
+                class="kv-dots"
+              >
+                ..........
+              </text>
+
+
+              <text
+                x="1140"
+                y="331"
+                text-anchor="end"
+                class="kv-value"
+              >
+                FastAPI
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r7)"
+            >
+
+              <text
+                x="550"
+                y="356"
+                class="kv-label"
+              >
+                AI / ML:
+              </text>
+
+
+              <text
+                x="606.8"
+                y="356"
+                class="kv-dots"
+              >
+                ..........
+              </text>
+
+
+              <text
+                x="1140"
+                y="356"
+                text-anchor="end"
+                class="kv-value"
+              >
+                PyTorch · Hugging Face
+              </text>
+
+            </g>
+          
+            <g
+              clip-path="url(#r8)"
+            >
+
+              <text
+                x="550"
+                y="381"
+                class="kv-label"
+              >
+                Tools:
+              </text>
+
+
+              <text
+                x="592.6"
+                y="381"
+                class="kv-dots"
+              >
+                ............
+              </text>
+
+
+              <text
+                x="1140"
+                y="381"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Docker · Git · GitHub Actions
+              </text>
+
+            </g>
+          
+          <line
+            x1="550"
+            y1="401"
+            x2="1140"
+            y2="401"
+            class="divider"
+          />
+        
+        <text
+          x="550"
+          y="415"
+          class="panel-title"
+        >
+          CONTACT
+        </text>
+      
+            <g
+              clip-path="url(#r9)"
+            >
+
+              <text
+                x="550"
+                y="441"
+                class="kv-label"
+              >
+                GitHub:
+              </text>
+
+
+              <text
+                x="599.7"
+                y="441"
+                class="kv-dots"
+              >
+                ...........
+              </text>
+
+
+              <text
+                x="1140"
+                y="441"
+                text-anchor="end"
+                class="kv-value"
+              >
+                Ladinski · 23 repos · 2 followers
+              </text>
+
+            </g>
+          
+
+
+  <!-- ====================================================== -->
+  <!-- FOOTER -->
+  <!-- ====================================================== -->
+
+  <line
+    x1="40"
+    y1="516"
+    x2="1140"
+    y2="516"
+    stroke="#1E293B"
+    stroke-width="1"
+  />
+
+
+  <text
+    x="40"
+    y="537"
+    class="foot"
+  >
+    Live GitHub stats + contribution activity below ↓
+  </text>
+
+
+  <text
+    x="1140"
+    y="537"
+    text-anchor="end"
+    class="foot"
+  >
+    synced 2026-08-29 15:43 UTC
+  </text>
+
+
+  <!-- ====================================================== -->
+  <!-- MOVING SCAN -->
+  <!-- ====================================================== -->
+
+  <g>
+
+    <animateTransform
+      attributeName="transform"
+      type="translate"
+      values="
+        0,-30;
+        0,582
+      "
+      dur="7s"
+      repeatCount="indefinite"
+    />
+
+
+    <rect
+      x="0"
+      y="-18"
+      width="1180"
+      height="36"
+      fill="url(#scanBeam)"
+    />
+
+
+    <line
+      x1="0"
+      y1="0"
+      x2="1180"
+      y2="0"
+      stroke="#7DD3FC"
+      stroke-width="1.5"
+      opacity="0.95"
+    />
+
+
+    <circle
+      cx="10"
+      cy="0"
+      r="2.5"
+      fill="#7DD3FC"
+      filter="url(#softGlow)"
+    />
+
+
+    <circle
+      cx="1170"
+      cy="0"
+      r="2.5"
+      fill="#7DD3FC"
+      filter="url(#softGlow)"
+    />
+
+  </g>
+
+</g>
+
+
+<!-- Animated outside border -->
+
+<rect
+  x="1"
+  y="1"
+  width="1178"
+  height="550"
+  rx="14"
+  fill="none"
+  stroke="url(#borderGrad)"
+  stroke-width="2"
+  filter="url(#softGlow)"
+/>
+
+
+</svg>
