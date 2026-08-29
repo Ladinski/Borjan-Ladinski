@@ -355,11 +355,11 @@ async function fetchGitHubStats() {
 
 
   if (
-    process.env.GITHUB_TOKEN
+    process.env.PROFILE_TOKEN
   ) {
 
     headers.Authorization =
-      `Bearer ${process.env.GITHUB_TOKEN}`;
+      `Bearer ${process.env.PROFILE_TOKEN}`;
   }
 
 
@@ -423,7 +423,7 @@ async function fetchGitHubStats() {
 async function fetchContributionCalendar() {
 
   const token =
-    process.env.GITHUB_TOKEN;
+    process.env.PROFILE_TOKEN;
 
 
   const query = `
