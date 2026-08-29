@@ -3,14 +3,14 @@
 <picture>
   <source
     media="(prefers-color-scheme: dark)"
-    srcset="./dark.svg"
+    srcset="./dark.svg?v=2"
   >
   <source
     media="(prefers-color-scheme: light)"
-    srcset="./light.svg"
+    srcset="./light.svg?v=2"
   >
   <img
-    src="./dark.svg"
+    src="./dark.svg?v=2"
     alt="Borjan Ladinski - AI Engineer"
     width="100%"
   >
@@ -21,14 +21,14 @@
 <picture>
   <source
     media="(prefers-color-scheme: dark)"
-    srcset="./heatmap-dark.svg"
+    srcset="./heatmap-dark.svg?v=2"
   >
   <source
     media="(prefers-color-scheme: light)"
-    srcset="./heatmap-light.svg"
+    srcset="./heatmap-light.svg?v=2"
   >
   <img
-    src="./heatmap-dark.svg"
+    src="./heatmap-dark.svg?v=2"
     alt="Borjan Ladinski GitHub Contributions"
     width="100%"
   >
