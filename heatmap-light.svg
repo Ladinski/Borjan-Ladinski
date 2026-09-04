@@ -238,7 +238,7 @@
     <tspan
       class="heat-accent"
     >
-      243
+      248
     </tspan>
 
     contributions · streak
@@ -8130,6 +8130,27 @@
               <rect
                 x="774"
                 y="130"
+                width="11"
+                height="11"
+                rx="2.5"
+                fill="#38BDF8"
+                opacity="0"
+              >
+
+                <animate
+                  attributeName="opacity"
+                  from="0"
+                  to="1"
+                  dur="0.35s"
+                  begin="0.774s"
+                  fill="freeze"
+                />
+
+              </rect>
+            
+              <rect
+                x="774"
+                y="144"
                 width="11"
                 height="11"
                 rx="2.5"
