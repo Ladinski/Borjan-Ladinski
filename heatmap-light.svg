@@ -238,7 +238,7 @@
     <tspan
       class="heat-accent"
     >
-      258
+      268
     </tspan>
 
     contributions · streak
@@ -246,7 +246,7 @@
     <tspan
       class="heat-accent"
     >
-      0d
+      3d
     </tspan>
 
     · best
@@ -8154,7 +8154,28 @@
                 width="11"
                 height="11"
                 rx="2.5"
-                fill="#E7ECF3"
+                fill="#BAE6FD"
+                opacity="0"
+              >
+
+                <animate
+                  attributeName="opacity"
+                  from="0"
+                  to="1"
+                  dur="0.35s"
+                  begin="0.774s"
+                  fill="freeze"
+                />
+
+              </rect>
+            
+              <rect
+                x="774"
+                y="158"
+                width="11"
+                height="11"
+                rx="2.5"
+                fill="#38BDF8"
                 opacity="0"
               >
 
